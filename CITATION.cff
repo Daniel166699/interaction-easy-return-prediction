@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this research baseline, please cite it as below."
+title: "Interaction Easy Q&A Text and Next-Day Stock Return Prediction"
+abstract: "A reproducible rolling-window machine-learning baseline using Qwen3-Embedding-4B text representations."
+authors:
+  - family-names: "Huang"
+    given-names: "Jincheng"
+year: 2026
+version: "0.1.0"
+license: MIT
+repository-code: "https://github.com/Daniel166699/interaction-easy-return-prediction"
+keywords:
+  - investor interaction
+  - stock return prediction
+  - text embedding
+  - machine learning
+  - China A-share

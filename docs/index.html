@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="互动易问答文本、Qwen3-Embedding 与次日股票收益率预测研究基线">
+  <title>互动易问答文本与次日收益率预测</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./">IE · Return Lab</a>
+    <nav>
+      <a href="#overview">概览</a>
+      <a href="#method">方法</a>
+      <a href="#results">结果</a>
+      <a href="#limitations">局限</a>
+      <a href="#roadmap">路线</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="overview">
+      <div class="eyebrow">RESEARCH BASELINE · 2010—2025</div>
+      <h1>互动易问答文本<br><span>与次日收益率预测</span></h1>
+      <p class="lead">基于 Qwen3-Embedding-4B、1024 维文本向量与 36 个月滚动样本外窗口，比较 8 类机器学习模型的弱信号预测能力。</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#results">查看结果</a>
+        <a class="button secondary" href="https://github.com/Daniel166699/interaction-easy-return-prediction">GitHub 仓库</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>4.73M</strong><span>面板事件</span></div>
+        <div><strong>156</strong><span>滚动窗口</span></div>
+        <div><strong>8</strong><span>模型对照</span></div>
+        <div><strong>1,024</strong><span>文本维度</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="section-heading">
+        <div class="eyebrow">DESIGN</div>
+        <h2>研究设计</h2>
+        <p>所有模型共享同一份数据、同一套时间切分和同一套标准化流程。</p>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-card"><span>01</span><h3>文本编码</h3><p>问题与回答拼接，Qwen3-Embedding-4B 输出 1024 维向量。</p></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-card"><span>02</span><h3>时间对齐</h3><p>按提问时间确定事件日，目标是下一交易日复权收益率。</p></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-card"><span>03</span><h3>滚动训练</h3><p>过去 36 个月训练，预测下一个月，共 156 个窗口。</p></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-card"><span>04</span><h3>样本外评估</h3><p>统一计算 IC、RankIC、ICIR、正 IC 胜率与 R²_oos。</p></div>
+      </div>
+      <div class="method-grid">
+        <article><h3>特征</h3><p><code>size + v0000 … v1023</code>，共 1025 维，不使用 PCA。</p></article>
+        <article><h3>样本权重</h3><p>本次基线只运行 EV，每条观测权重均为 1。</p></article>
+        <article><h3>防泄漏切分</h3><p>按日期排序，不打乱；标准化只使用训练集参数。</p></article>
+        <article><h3>股票范围</h3><p>深市主板与创业板，约 3,029 只股票。</p></article>
+      </div>
+    </section>
+
+    <section class="section dark" id="results">
+      <div class="section-heading">
+        <div class="eyebrow">OUT-OF-SAMPLE RESULTS</div>
+        <h2>样本外结果</h2>
+        <p>Lasso 与 ElasticNet 的平均 IC 和稳定性表现最好；树模型胜率较高但波动更大。</p>
+      </div>
+      <div class="result-cards">
+        <div class="result-card"><span>最高平均 IC</span><strong>0.02242</strong><small>Lasso</small></div>
+        <div class="result-card"><span>最高 ICIR</span><strong>0.6964</strong><small>ElasticNet</small></div>
+        <div class="result-card"><span>最高 IC 胜率</span><strong>79.49%</strong><small>CatBoost · XGBoost</small></div>
+        <div class="result-card"><span>方向准确率</span><strong>50.50%</strong><small>Lasso 全样本</small></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型</th><th>平均 IC</th><th>ICIR</th><th>年化 ICIR</th><th>IC 胜率</th><th>R²_oos</th><th>合并 RankIC</th></tr></thead>
+          <tbody>
+            <tr class="best"><td>Lasso</td><td>0.02242</td><td>0.6947</td><td>2.4065</td><td>73.72%</td><td>-0.00005</td><td>0.02995</td></tr>
+            <tr><td>ElasticNet</td><td>0.02179</td><td>0.6964</td><td>2.4125</td><td>75.00%</td><td>-0.00067</td><td>0.02788</td></tr>
+            <tr><td>CatBoost</td><td>0.02080</td><td>0.5433</td><td>1.8820</td><td>79.49%</td><td>-0.00251</td><td>0.02960</td></tr>
+            <tr><td>LightGBM</td><td>0.02007</td><td>0.5513</td><td>1.9096</td><td>78.21%</td><td>-0.00302</td><td>0.02834</td></tr>
+            <tr><td>XGBoost</td><td>0.01835</td><td>0.5087</td><td>1.7621</td><td>79.49%</td><td>-0.00406</td><td>0.02503</td></tr>
+            <tr><td>Ridge</td><td>0.01763</td><td>0.6138</td><td>2.1264</td><td>75.64%</td><td>-0.00371</td><td>0.02111</td></tr>
+            <tr><td>RandomForest</td><td>0.01006</td><td>0.4510</td><td>1.5622</td><td>69.87%</td><td>-0.00276</td><td>0.01779</td></tr>
+            <tr><td>MLP</td><td>0.00961</td><td>0.3826</td><td>1.3253</td><td>64.74%</td><td>-0.00352</td><td>0.01328</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">每个模型包含 4,511,795 条样本外预测。R² 接近零或略负说明点预测能力有限，IC 与 RankIC 更适于观察弱排序信号。</p>
+    </section>
+
+    <section class="section" id="limitations">
+      <div class="section-heading">
+        <div class="eyebrow">CRITICAL REVIEW</div>
+        <h2>关键局限</h2>
+        <p>这是工程基线，不是可以直接用于市场有效性判断的最终实证模型。</p>
+      </div>
+      <div class="warning">
+        <h3>文本时间可用性偏差</h3>
+        <p>当前事件日按 <code>question_time</code> 确定，但文本包含回答内容。94.03% 的面板事件有回答，其中 85.76% 的回答晚于 <code>query_date 15:00</code>，回答延迟中位数为 56.6 小时。</p>
+      </div>
+      <div class="limitations-grid">
+        <article><h3>缺少沪市与北交所</h3><p>当前只覆盖深市主板和创业板，市场代表性有限。</p></article>
+        <article><h3>控制变量不足</h3><p>仅有总市值 size，缺少流通市值、BM、换手率、行业与市场收益。</p></article>
+        <article><h3>收益极值未缩尾</h3><p>样本仍存在极端日收益，MSE 与 R² 容易受异常值影响。</p></article>
+        <article><h3>没有交易回测</h3><p>尚未考虑交易成本、冲击成本、涨跌停与停牌约束。</p></article>
+      </div>
+    </section>
+
+    <section class="section ink" id="roadmap">
+      <div class="section-heading">
+        <div class="eyebrow">NEXT STEPS</div>
+        <h2>后续路线</h2>
+      </div>
+      <ol class="timeline">
+        <li><span>01</span><div><h3>修正事件时间</h3><p>复用现有 Q+A embedding，按 reply_time 重建回答事件面板。</p></div></li>
+        <li><span>02</span><div><h3>建立问题对照</h3><p>重新生成 question-only embedding，比较问题模型与 Q+A 增量信息。</p></div></li>
+        <li><span>03</span><div><h3>回答事件研究</h3><p>检验 CAAR、异常成交量、波动率与回答后漂移。</p></div></li>
+        <li><span>04</span><div><h3>补齐数据与稳健性</h3><p>增加沪市、流通市值、BM、换手率，并按训练窗口缩尾、去重和中性化。</p></div></li>
+        <li><span>05</span><div><h3>经济显著性</h3><p>十分组、多空组合、换手率、交易成本、容量和最大回撤。</p></div></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>互动易问答文本与次日收益率预测 · Research Baseline · 2026</p>
+    <p><a href="https://github.com/Daniel166699/interaction-easy-return-prediction">GitHub</a> · <a href="https://github.com/Daniel166699">Profile</a></p>
+  </footer>
+</body>
+</html>

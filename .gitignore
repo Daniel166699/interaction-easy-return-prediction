@@ -1,0 +1,53 @@
+# Licensed or large local data
+data/*
+!data/README.md
+models/*
+!models/README.md
+收益率数据/
+数据清洗/
+embedding/
+output/
+rolling_ev_parts/
+rolling_baseline_linear/
+rolling_baseline_linear_ev/
+
+# Large files
+*.npy
+*.npz
+*.parquet
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.zip
+*.7z
+*.tar
+*.gz
+
+# Secrets and local state
+.env
+.env.*
+*.pem
+*.key
+*.log
+.ssh/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Keep selected public artifacts
+!results/*.csv
+!examples/*.csv
